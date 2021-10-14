@@ -1,13 +1,9 @@
-FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
-WORKDIR /source
-
-COPY . .
-RUN dotnet restore ./src/RedisGeo.sln
-
-WORKDIR /source/src/RedisGeo
-RUN dotnet publish -c release -o /app --no-restore
-
-FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS runtime
+FROM microsoft/dotnet:latest
+COPY src /app
 WORKDIR /app
-COPY --from=build /app ./
-ENTRYPOINT ["dotnet", "RedisGeo.dll"]
+RUN ["dotnet", "restore"]
+WORKDIR /app/RedisGeo
+RUN ["dotnet", "build"]
+EXPOSE 5000/tcp
+ENV ASPNETCORE_URLS https://*.5000
+ENTRYPOINT ["dotnet", "run", "--server.urls", "http://*.5000"]
